@@ -1,23 +1,101 @@
 import { useState } from "react";
 import api from "../api/api";
 
+const styles = {
+  wrapper: {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#0f172a",
+    padding: "16px",
+  },
+  card: {
+    width: "100%",
+    maxWidth: "380px",
+    background: "#ffffff",
+    borderRadius: "14px",
+    padding: "24px",
+    boxShadow: "0 12px 30px rgba(0,0,0,0.2)",
+    color: "#0f172a",
+  },
+  title: {
+    marginBottom: "16px",
+    textAlign: "center",
+  },
+  input: {
+    width: "100%",
+    padding: "12px",
+    marginBottom: "14px",
+    borderRadius: "8px",
+    border: "1px solid #cbd5f5",
+    fontSize: "15px",
+  },
+  button: {
+    width: "100%",
+    padding: "12px",
+    background: "#16a34a",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer",
+    fontSize: "15px",
+  },
+  success: {
+    background: "#dcfce7",
+    color: "#166534",
+    padding: "10px",
+    borderRadius: "8px",
+    marginBottom: "14px",
+    fontSize: "14px",
+    textAlign: "center",
+  },
+};
+
 export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
 
   const handleRegister = async () => {
-    await api.post("/api/auth/register", { username, password });
-    setMsg("Registered successfully. Please login.");
+    try {
+      setMsg("");
+      await api.post("/api/auth/register", { username, password });
+      setMsg("🎉 Registered successfully! Please login.");
+      setUsername("");
+      setPassword("");
+    } catch {
+      setMsg("❌ Registration failed. Try another username.");
+    }
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      {msg && <p>{msg}</p>}
-      <input placeholder="Username" onChange={e => setUsername(e.target.value)} />
-      <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
-      <button onClick={handleRegister}>Register</button>
+    <div style={styles.wrapper}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>📝 Register</h2>
+
+        {msg && <div style={styles.success}>{msg}</div>}
+
+        <input
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+        />
+
+        <input
+          style={styles.input}
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+
+        <button style={styles.button} onClick={handleRegister}>
+          Create Account
+        </button>
+      </div>
     </div>
   );
 }
