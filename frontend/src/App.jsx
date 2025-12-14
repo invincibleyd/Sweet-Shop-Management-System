@@ -10,27 +10,32 @@ const styles = {
   page: {
     minHeight: "100vh",
     background: "#0f172a",
-    padding: "32px",
+    padding: "20px", // smaller for mobile
     fontFamily: "Inter, Segoe UI, sans-serif",
     color: "#f8fafc",
   },
   container: {
-    maxWidth: "900px",
+    maxWidth: "1100px",
     margin: "0 auto",
   },
   header: {
     display: "flex",
+    flexWrap: "wrap",   // ✅ important
+    gap: "15px",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "28px",
+    marginBottom: "25px",
   },
+  grid: {
+    display: "grid",
+    gap: "20px", // 👈 THIS adds space between cards
+  },  
   card: {
     background: "#ffffff",
     color: "#0f172a",
-    borderRadius: "12px",
-    padding: "18px",
+    borderRadius: "15px",
+    padding: "15px",
     boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-    marginBottom: "18px",
   },
   input: {
     width: "100%",
@@ -166,8 +171,10 @@ export default function App() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
+        {/* HEADER */}
         <div style={styles.header}>
           <h1>🍬 Sweet Shop</h1>
+  
           <div>
             {isAdmin && <span style={styles.badgeAdmin}>ADMIN</span>}
             <button onClick={logout} style={styles.btnSecondary}>
@@ -176,6 +183,7 @@ export default function App() {
           </div>
         </div>
   
+        {/* ADMIN FORM */}
         {isAdmin && (
           <div style={styles.card}>
             <AdminSweetForm
@@ -188,6 +196,7 @@ export default function App() {
           </div>
         )}
   
+        {/* SEARCH */}
         <input
           placeholder="Search sweets by name or category..."
           value={query}
@@ -195,57 +204,59 @@ export default function App() {
           style={styles.input}
         />
   
-        {sweets.length === 0 && (
-          <p style={styles.muted}>No sweets available 🍭</p>
-        )}
+        {/* SWEETS GRID */}
+        <div style={styles.grid}>
+          {sweets
+            .filter(s =>
+              s.name.toLowerCase().includes(query.toLowerCase()) ||
+              s.category.toLowerCase().includes(query.toLowerCase())
+            )
+            .map(sweet => (
+              <div key={sweet.id} style={styles.card}>
+                <h3>{sweet.name}</h3>
+                <p style={styles.muted}>Category: {sweet.category}</p>
+                <p><b>Price:</b> ₹{sweet.price}</p>
+                <p>
+                  <b>Stock:</b>{" "}
+                  <span style={{ color: sweet.quantity === 0 ? "#dc2626" : "#16a34a" }}>
+                    {sweet.quantity}
+                  </span>
+                </p>
   
-        {sweets
-          .filter(s =>
-            s.name.toLowerCase().includes(query.toLowerCase()) ||
-            s.category.toLowerCase().includes(query.toLowerCase())
-          )
-          .map(sweet => (
-            <div key={sweet.id} style={styles.card}>
-              <h3>{sweet.name}</h3>
-              <p style={styles.muted}>Category: {sweet.category}</p>
-              <p><b>Price:</b> ₹{sweet.price}</p>
-              <p>
-                <b>Stock:</b>{" "}
-                <span style={{ color: sweet.quantity === 0 ? "#dc2626" : "#16a34a" }}>
-                  {sweet.quantity}
-                </span>
-              </p>
-  
-              <button
-                disabled={sweet.quantity === 0}
-                onClick={() => purchaseSweet(sweet.id)}
-                style={{
-                  ...styles.btnPrimary,
-                  opacity: sweet.quantity === 0 ? 0.5 : 1
-                }}
-              >
-                Purchase
-              </button>
-  
-              {isAdmin && (
-                <>
+                {/* BUTTONS */}
+                <div style={styles.buttonRow}>
                   <button
-                    onClick={() => setSelectedSweet(sweet)}
-                    style={styles.btnSecondary}
+                    disabled={sweet.quantity === 0}
+                    onClick={() => purchaseSweet(sweet.id)}
+                    style={{
+                      ...styles.btnPrimary,
+                      opacity: sweet.quantity === 0 ? 0.5 : 1
+                    }}
                   >
-                    Edit
+                    Purchase
                   </button>
   
-                  <button
-                    onClick={() => deleteSweet(sweet.id)}
-                    style={styles.btnDanger}
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
+                  {isAdmin && (
+                    <>
+                      <button
+                        onClick={() => setSelectedSweet(sweet)}
+                        style={styles.btnSecondary}
+                      >
+                        Edit
+                      </button>
+  
+                      <button
+                        onClick={() => deleteSweet(sweet.id)}
+                        style={styles.btnDanger}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );

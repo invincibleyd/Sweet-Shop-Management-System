@@ -7,6 +7,10 @@ import App from "./App.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <App />
-    <Toaster position="top-right" reverseOrder={false} />
   </StrictMode>
+);
+
+// ✅ mount Toaster OUTSIDE StrictMode
+createRoot(document.getElementById("toast-root") ?? document.body.appendChild(document.createElement("div"))).render(
+  <Toaster position="top-right" />
 );
