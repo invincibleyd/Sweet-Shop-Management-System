@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "./api/api";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AdminSweetForm from "./components/AdminSweetForm";
 
 export default function App() {
   const [sweets, setSweets] = useState([]);
@@ -10,8 +11,9 @@ export default function App() {
     !!localStorage.getItem("token")
   );
   const [showRegister, setShowRegister] = useState(false);
+  const [selectedSweet, setSelectedSweet] = useState(null); // ⭐ NEW
 
-  // fetch sweets (unchanged logic)
+  // fetch sweets
   const fetchSweets = () => {
     api.get("/api/sweets")
       .then(res => setSweets(res.data))
@@ -44,7 +46,7 @@ export default function App() {
     setLoggedIn(false);
   };
 
-  // NOT LOGGED IN → show auth screens
+  // NOT LOGGED IN → auth screens
   if (!loggedIn) {
     return (
       <div style={{ padding: "20px" }}>
@@ -80,6 +82,15 @@ export default function App() {
         Logout
       </button>
 
+      {/* 🔧 ADMIN ADD / UPDATE FORM */}
+      <AdminSweetForm
+        selectedSweet={selectedSweet}
+        onSuccess={() => {
+          setSelectedSweet(null);
+          fetchSweets();
+        }}
+      />
+
       {/* Search */}
       <input
         placeholder="Search sweets by name or category"
@@ -114,6 +125,13 @@ export default function App() {
               onClick={() => purchaseSweet(sweet.id)}
             >
               Purchase
+            </button>
+
+            <button
+              onClick={() => setSelectedSweet(sweet)} // ⭐ EDIT
+              style={{ marginLeft: "10px" }}
+            >
+              Edit
             </button>
 
             <button
