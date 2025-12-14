@@ -9,33 +9,41 @@ import { jwtDecode } from "jwt-decode";
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #fff7ed, #fde68a)",
-    padding: "30px",
-    fontFamily: "Segoe UI, sans-serif",
+    background: "#0f172a",
+    padding: "32px",
+    fontFamily: "Inter, Segoe UI, sans-serif",
+    color: "#f8fafc",
+  },
+  container: {
+    maxWidth: "900px",
+    margin: "0 auto",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "25px",
+    marginBottom: "28px",
   },
   card: {
-    background: "#fff",
-    borderRadius: "14px",
-    padding: "16px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-    marginBottom: "16px",
+    background: "#ffffff",
+    color: "#0f172a",
+    borderRadius: "12px",
+    padding: "18px",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+    marginBottom: "18px",
   },
   input: {
     width: "100%",
-    padding: "10px",
-    borderRadius: "10px",
-    border: "1px solid #ddd",
+    padding: "12px",
+    borderRadius: "8px",
+    border: "1px solid #cbd5f5",
     marginBottom: "20px",
     fontSize: "15px",
+    background: "#f8fafc",
   },
   btnPrimary: {
-    background: "#f59e0b",
+    background: "#2563eb",
+    color: "#ffffff",
     border: "none",
     padding: "8px 14px",
     borderRadius: "8px",
@@ -44,6 +52,7 @@ const styles = {
   },
   btnSecondary: {
     background: "#e5e7eb",
+    color: "#0f172a",
     border: "none",
     padding: "8px 14px",
     borderRadius: "8px",
@@ -51,23 +60,28 @@ const styles = {
     cursor: "pointer",
   },
   btnDanger: {
-    background: "#ef4444",
+    background: "#dc2626",
+    color: "#ffffff",
     border: "none",
     padding: "8px 14px",
     borderRadius: "8px",
     marginLeft: "8px",
-    color: "#fff",
     cursor: "pointer",
   },
   badgeAdmin: {
-    background: "#22c55e",
-    color: "#fff",
+    background: "#16a34a",
+    color: "#ffffff",
     padding: "4px 10px",
     borderRadius: "999px",
     fontSize: "12px",
     marginRight: "10px",
+  },
+  muted: {
+    color: "#475569",
+    fontSize: "14px",
   }
 };
+
 
 export default function App() {
   const [sweets, setSweets] = useState([]);
@@ -151,84 +165,89 @@ export default function App() {
   /* 🏠 DASHBOARD */
   return (
     <div style={styles.page}>
-      <div style={styles.header}>
-        <h1>🍬 Sweet Shop</h1>
-        <div>
-          {isAdmin && <span style={styles.badgeAdmin}>ADMIN</span>}
-          <button onClick={logout} style={styles.btnSecondary}>
-            Logout
-          </button>
-        </div>
-      </div>
-
-      {isAdmin && (
-        <div style={styles.card}>
-          <AdminSweetForm
-            selectedSweet={selectedSweet}
-            onSuccess={() => {
-              setSelectedSweet(null);
-              fetchSweets();
-            }}
-          />
-        </div>
-      )}
-
-      <input
-        placeholder="Search sweets by name or category..."
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        style={styles.input}
-      />
-
-      {sweets.length === 0 && <p>No sweets available 🍭</p>}
-
-      {sweets
-        .filter(s =>
-          s.name.toLowerCase().includes(query.toLowerCase()) ||
-          s.category.toLowerCase().includes(query.toLowerCase())
-        )
-        .map(sweet => (
-          <div key={sweet.id} style={styles.card}>
-            <h3>{sweet.name}</h3>
-            <p><b>Category:</b> {sweet.category}</p>
-            <p><b>Price:</b> ₹{sweet.price}</p>
-            <p>
-              <b>Stock:</b>{" "}
-              <span style={{ color: sweet.quantity === 0 ? "#ef4444" : "#16a34a" }}>
-                {sweet.quantity}
-              </span>
-            </p>
-
-            <button
-              disabled={sweet.quantity === 0}
-              onClick={() => purchaseSweet(sweet.id)}
-              style={{
-                ...styles.btnPrimary,
-                opacity: sweet.quantity === 0 ? 0.5 : 1
-              }}
-            >
-              Purchase
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <h1>🍬 Sweet Shop</h1>
+          <div>
+            {isAdmin && <span style={styles.badgeAdmin}>ADMIN</span>}
+            <button onClick={logout} style={styles.btnSecondary}>
+              Logout
             </button>
-
-            {isAdmin && (
-              <>
-                <button
-                  onClick={() => setSelectedSweet(sweet)}
-                  style={styles.btnSecondary}
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => deleteSweet(sweet.id)}
-                  style={styles.btnDanger}
-                >
-                  Delete
-                </button>
-              </>
-            )}
           </div>
-        ))}
+        </div>
+  
+        {isAdmin && (
+          <div style={styles.card}>
+            <AdminSweetForm
+              selectedSweet={selectedSweet}
+              onSuccess={() => {
+                setSelectedSweet(null);
+                fetchSweets();
+              }}
+            />
+          </div>
+        )}
+  
+        <input
+          placeholder="Search sweets by name or category..."
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          style={styles.input}
+        />
+  
+        {sweets.length === 0 && (
+          <p style={styles.muted}>No sweets available 🍭</p>
+        )}
+  
+        {sweets
+          .filter(s =>
+            s.name.toLowerCase().includes(query.toLowerCase()) ||
+            s.category.toLowerCase().includes(query.toLowerCase())
+          )
+          .map(sweet => (
+            <div key={sweet.id} style={styles.card}>
+              <h3>{sweet.name}</h3>
+              <p style={styles.muted}>Category: {sweet.category}</p>
+              <p><b>Price:</b> ₹{sweet.price}</p>
+              <p>
+                <b>Stock:</b>{" "}
+                <span style={{ color: sweet.quantity === 0 ? "#dc2626" : "#16a34a" }}>
+                  {sweet.quantity}
+                </span>
+              </p>
+  
+              <button
+                disabled={sweet.quantity === 0}
+                onClick={() => purchaseSweet(sweet.id)}
+                style={{
+                  ...styles.btnPrimary,
+                  opacity: sweet.quantity === 0 ? 0.5 : 1
+                }}
+              >
+                Purchase
+              </button>
+  
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setSelectedSweet(sweet)}
+                    style={styles.btnSecondary}
+                  >
+                    Edit
+                  </button>
+  
+                  <button
+                    onClick={() => deleteSweet(sweet.id)}
+                    style={styles.btnDanger}
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
+      </div>
     </div>
   );
+  
 }
