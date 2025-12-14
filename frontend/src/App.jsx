@@ -5,6 +5,70 @@ import Register from "./pages/Register";
 import AdminSweetForm from "./components/AdminSweetForm";
 import { jwtDecode } from "jwt-decode";
 
+/* 🎨 UI Styles */
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #fff7ed, #fde68a)",
+    padding: "30px",
+    fontFamily: "Segoe UI, sans-serif",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "25px",
+  },
+  card: {
+    background: "#fff",
+    borderRadius: "14px",
+    padding: "16px",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+    marginBottom: "16px",
+  },
+  input: {
+    width: "100%",
+    padding: "10px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+    marginBottom: "20px",
+    fontSize: "15px",
+  },
+  btnPrimary: {
+    background: "#f59e0b",
+    border: "none",
+    padding: "8px 14px",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  btnSecondary: {
+    background: "#e5e7eb",
+    border: "none",
+    padding: "8px 14px",
+    borderRadius: "8px",
+    marginLeft: "8px",
+    cursor: "pointer",
+  },
+  btnDanger: {
+    background: "#ef4444",
+    border: "none",
+    padding: "8px 14px",
+    borderRadius: "8px",
+    marginLeft: "8px",
+    color: "#fff",
+    cursor: "pointer",
+  },
+  badgeAdmin: {
+    background: "#22c55e",
+    color: "#fff",
+    padding: "4px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    marginRight: "10px",
+  }
+};
+
 export default function App() {
   const [sweets, setSweets] = useState([]);
   const [query, setQuery] = useState("");
@@ -13,39 +77,31 @@ export default function App() {
   );
   const [showRegister, setShowRegister] = useState(false);
   const [selectedSweet, setSelectedSweet] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false); // ✅ ADD THIS
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // 🔐 Decode token & detect admin
+  /* 🔐 Decode JWT */
   useEffect(() => {
     const token = localStorage.getItem("token");
-
-    if (!token) {
-      setIsAdmin(false);
-      return;
-    }
+    if (!token) return setIsAdmin(false);
 
     try {
       const decoded = jwtDecode(token);
-      console.log("JWT decoded:", decoded); // debug
       setIsAdmin(decoded.is_admin === true);
-    } catch (err) {
-      console.error("JWT decode failed", err);
+    } catch {
       setIsAdmin(false);
     }
   }, [loggedIn]);
 
-  // fetch sweets
   const fetchSweets = () => {
     api.get("/api/sweets")
       .then(res => setSweets(res.data))
-      .catch(err => console.error(err));
+      .catch(console.error);
   };
 
   useEffect(() => {
     fetchSweets();
   }, []);
 
-  // purchase sweet
   const purchaseSweet = async (id) => {
     await api.post(`/api/sweets/${id}/purchase`);
     setSweets(prev =>
@@ -55,25 +111,22 @@ export default function App() {
     );
   };
 
-  // delete sweet (admin only – backend enforces)
   const deleteSweet = async (id) => {
     await api.delete(`/api/sweets/${id}`);
     setSweets(prev => prev.filter(s => s.id !== id));
   };
 
-  // logout
   const logout = () => {
     localStorage.removeItem("token");
     setLoggedIn(false);
     setIsAdmin(false);
   };
 
-  // NOT LOGGED IN → auth screens
+  /* 🔐 AUTH SCREENS */
   if (!loggedIn) {
     return (
-      <div style={{ padding: "20px" }}>
+      <div style={styles.page}>
         <h1>🍬 Sweet Shop</h1>
-
         {showRegister ? (
           <>
             <Register />
@@ -95,35 +148,39 @@ export default function App() {
     );
   }
 
-  // LOGGED IN → dashboard
+  /* 🏠 DASHBOARD */
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>🍬 Sweet Shop</h1>
+    <div style={styles.page}>
+      <div style={styles.header}>
+        <h1>🍬 Sweet Shop</h1>
+        <div>
+          {isAdmin && <span style={styles.badgeAdmin}>ADMIN</span>}
+          <button onClick={logout} style={styles.btnSecondary}>
+            Logout
+          </button>
+        </div>
+      </div>
 
-      <button onClick={logout} style={{ float: "right" }}>
-        Logout
-      </button>
-
-      {/* 🔒 ADMIN ADD / UPDATE FORM */}
       {isAdmin && (
-        <AdminSweetForm
-          selectedSweet={selectedSweet}
-          onSuccess={() => {
-            setSelectedSweet(null);
-            fetchSweets();
-          }}
-        />
+        <div style={styles.card}>
+          <AdminSweetForm
+            selectedSweet={selectedSweet}
+            onSuccess={() => {
+              setSelectedSweet(null);
+              fetchSweets();
+            }}
+          />
+        </div>
       )}
 
-      {/* Search */}
       <input
-        placeholder="Search sweets by name or category"
+        placeholder="Search sweets by name or category..."
         value={query}
         onChange={e => setQuery(e.target.value)}
-        style={{ marginBottom: "20px", width: "100%" }}
+        style={styles.input}
       />
 
-      {sweets.length === 0 && <p>No sweets available</p>}
+      {sweets.length === 0 && <p>No sweets available 🍭</p>}
 
       {sweets
         .filter(s =>
@@ -131,39 +188,40 @@ export default function App() {
           s.category.toLowerCase().includes(query.toLowerCase())
         )
         .map(sweet => (
-          <div
-            key={sweet.id}
-            style={{
-              border: "1px solid #ccc",
-              padding: "10px",
-              marginBottom: "10px",
-            }}
-          >
+          <div key={sweet.id} style={styles.card}>
             <h3>{sweet.name}</h3>
-            <p>Category: {sweet.category}</p>
-            <p>Price: ₹{sweet.price}</p>
-            <p>Stock: {sweet.quantity}</p>
+            <p><b>Category:</b> {sweet.category}</p>
+            <p><b>Price:</b> ₹{sweet.price}</p>
+            <p>
+              <b>Stock:</b>{" "}
+              <span style={{ color: sweet.quantity === 0 ? "#ef4444" : "#16a34a" }}>
+                {sweet.quantity}
+              </span>
+            </p>
 
             <button
               disabled={sweet.quantity === 0}
               onClick={() => purchaseSweet(sweet.id)}
+              style={{
+                ...styles.btnPrimary,
+                opacity: sweet.quantity === 0 ? 0.5 : 1
+              }}
             >
               Purchase
             </button>
 
-            {/* 🔒 ADMIN CONTROLS */}
             {isAdmin && (
               <>
                 <button
                   onClick={() => setSelectedSweet(sweet)}
-                  style={{ marginLeft: "10px" }}
+                  style={styles.btnSecondary}
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => deleteSweet(sweet.id)}
-                  style={{ marginLeft: "10px", color: "red" }}
+                  style={styles.btnDanger}
                 >
                   Delete
                 </button>
