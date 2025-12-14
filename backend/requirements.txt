@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+alembic
+python-jose
+passlib[argon2]
+pydantic
+pytest
+httpx
+python-multipart
